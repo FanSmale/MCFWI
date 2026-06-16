@@ -1,0 +1,17 @@
+# Core Machine Learning & Math
+torch>=1.10.0
+numpy
+scipy
+scikit-learn
+
+# Computer Vision & Image Processing
+scikit-image
+opencv-python
+Pillow
+
+# Visualization & Logging
+matplotlib
+tensorboard
+
+# Metrics
+lpips
