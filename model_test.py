@@ -8,7 +8,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="testing script for seismic wave velocity inversion network")
 
     parser.add_argument('--model_type', type=str, default='MCFWI',
-                        help='net: DDNet, InversionNet, MCFWI')
+                        help='net: DDNet70, InversionNet, DCNet, MCFWI')
     parser.add_argument('--model_path', type=str, required=True, help='Path to the .pth weight file for testing')
 
     parser.add_argument('--lr', type=float, default=0.001, help='Learning rate (placeholder for optimizer initialization during testing)')
@@ -72,7 +72,7 @@ def batch_test(args, config):
             if torch.cuda.is_available():
                 seis_image, gt_vmodel = seis_image.cuda(non_blocking=True), gt_vmodel.cuda(non_blocking=True)
 
-            if args.model_type in ["DDNet", "DDNet70"]:
+            if args.model_type in ["DDNet70"]:
                 outputs, _ = model_net(seis_image, config['model_dim'])
             elif args.model_type == "InversionNet":
                 outputs = model_net(seis_image)
@@ -128,12 +128,10 @@ def single_test(args, config):
         seismic_data_tensor = seismic_data_tensor.cuda(non_blocking=True)
 
     with torch.no_grad():
-        if args.model_type in ["DDNet", "DDNet70"]:
-            predicted_vmod_tensor, _ = model_net(seismic_data_tensor, config['model_dim'])
-        elif args.model_type == "InversionNet":
-            predicted_vmod_tensor = model_net(seismic_data_tensor)
+        if args.model_type in ["MCFWI", "DDNet70"]:
+            predicted_vmod_tensor= model_net(seismic_data_tensor, config['model_dim'])
         else:
-            predicted_vmod_tensor = model_net(seismic_data_tensor, config['model_dim'])
+            predicted_vmod_tensor = model_net(seismic_data_tensor)
 
     predicted_vmod = predicted_vmod_tensor.cpu().numpy()[0][0]
     predicted_vmod = np.where(predicted_vmod > 0.0, predicted_vmod, 0.0)
