@@ -4,8 +4,9 @@ import json
 import datetime
 from torch.utils.tensorboard import SummaryWriter
 from func.datasets_reader import *
-from func.comparison_net import InversionNet
-from func.net import DDNet70Model
+from func.InversionNet import InversionNet
+from func.DDNet70 import DDNet70Model
+from func.DCNet import DCModel
 from loss import LossSwin
 from MCFWI import MCFWI
 
@@ -13,7 +14,7 @@ from MCFWI import MCFWI
 def parse_args():
     parser = argparse.ArgumentParser(description="training script for seismic wave velocity inversion network")
     parser.add_argument('--model_type', type=str, default='MCFWI',
-                        help='net: DDNet70, InversionNet, MCFWI')
+                        help='net: DDNet70, InversionNet, DCNet, MCFWI')
     parser.add_argument('--epochs', type=int, default=150, help='epochs')
     parser.add_argument('--batch_size', type=int, default=16, help='batch_size')
     parser.add_argument('--lr', type=float, default=0.001, help='lr')
@@ -55,6 +56,8 @@ def determine_network(args, config):
         net_model = DDNet70Model(n_classes=classes, in_channels=inchannels, is_deconv=True, is_batchnorm=True)
     elif args.model_type == "InversionNet":
         net_model = InversionNet()
+    elif args.model_type == "DCNet":
+        net_model = DCModel()
     elif args.model_type == "MCFWI":
         net_model = MCFWI()
     else:
@@ -148,7 +151,7 @@ def main():
                 images, labels = images.cuda(non_blocking=True), labels.cuda(non_blocking=True)
             optimizer.zero_grad()
 
-            if args.model_type in ["MCFWI", "DDNet70", "InversionNet"]:
+            if args.model_type in ["MCFWI", "DDNet70"]:
                 outputs = model(images, model_dim)
             else:
                 outputs = model(images)
@@ -236,5 +239,5 @@ if __name__ == "__main__":
     main()
 
 
-#python model_train.py --batch_size 16 --epochs 2 --train_size 500 --model_type MCFWI
+#python model_train.py --batch_size 16 --epochs 2 --train_size 500 --model_type
 #tensorboard --logdir=Replace it with your own path
